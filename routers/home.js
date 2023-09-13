@@ -11,53 +11,99 @@ Router.get("/", async (req, res) => {
     return res.status(400).send(err.message);
   }
 });
-const verifyCaptcha = async (req, res, next) => {
-  const { "g-recaptcha-response": token } = req.body;
-  const secretKey = "6Le_np0mAAAAANvpwFAN6nd9PBub3_3jrWRLbsrY";
-  const verificationUrl = "https://www.google.com/recaptcha/api/siteverify";
-  const postData = querystring.stringify({
-    secret: secretKey,
-    response: token,
-  });
-console.log('Helo');
+// const verifyCaptcha = async (req, res, next) => {
+//   const { "g-recaptcha-response": token } = req.body;
+//   const secretKey = "6Le_np0mAAAAANvpwFAN6nd9PBub3_3jrWRLbsrY";
+//   const verificationUrl = "https://www.google.com/recaptcha/api/siteverify";
+//   const postData = querystring.stringify({
+//     secret: secretKey,
+//     response: token,
+//   });
+// console.log('Helo');
 
-  axios.post(verificationUrl, postData).then((response) => {
-    const { success } = response.data;
-    console.log('hello');
+//   axios.post(verificationUrl, postData).then((response) => {
+//     const { success } = response.data;
+//     console.log('hello');
     
-    if (success) {
-      res.send("Signup successful!");
-    } else {
-      res.status(401).send("Verfication failed");
-    }
-  });
-};
+//     if (success) {
+//       res.send("Signup successful!");
+//     } else {
+//       res.status(401).send("Verfication failed");
+//     }
+//   });
+// };
 
-Router.post("/register",verifyCaptcha, async (req, res) => {
+// Router.post("/register",verifyCaptcha, async (req, res) => {
+//   try {
+//     const {
+//       username,
+//       email,
+//       studentNumber,
+//       phone,
+//       hackerRankUsername,
+//       UnstopUsername,
+//       section,
+//       branch,
+//       year,
+//       gender,
+//       residence,
+//     } = req.body;
+
+//     const useremail = await homeSchema.findOne({
+//       email: email,
+//     });
+//     if (useremail) {
+//       console.log("User Already Exists");
+//       res.json({ success: false, msg: "User already exist" });
+//     } else {
+//       try {
+//         const userData = new homeSchema({
+//           username,
+//           email,
+//           studentNumber,
+//           phone,
+//           hackerRankUsername,
+//           UnstopUsername,
+//           section,
+//           branch,
+//           year,
+//           gender,
+//           residence,
+//         });
+//         await userData.save();
+//         res.json({ success: true, msg: "Registered Successfully" });
+//       } catch (err) {
+//         console.log(err);
+//         res.json({ succes: false });
+//       }
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
+
+module.exports = Router;
+// Your registration endpoint
+app.post('/register', async (req, res) => {
+  const { recaptchaToken, ...otherData } = req.body;
+  const secretKey="6Le_np0mAAAAANvpwFAN6nd9PBub3_3jrWRLbsrY"
   try {
-    const {
-      username,
-      email,
-      studentNumber,
-      phone,
-      hackerRankUsername,
-      UnstopUsername,
-      section,
-      branch,
-      year,
-      gender,
-      residence,
-    } = req.body;
+    // Verify reCAPTCHA on the server
+    const captchaResponse = await axios.post(
+      'https://www.google.com/recaptcha/api/siteverify',
+      `secret=${secretKey}&response=${recaptchaToken}`,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
 
-    const useremail = await homeSchema.findOne({
-      email: email,
-    });
-    if (useremail) {
-      console.log("User Already Exists");
-      res.json({ success: false, msg: "User already exist" });
-    } else {
+    const captchaData = captchaResponse.data;
+
+    if (captchaData.success) {
       try {
-        const userData = new homeSchema({
+        const {
           username,
           email,
           studentNumber,
@@ -69,17 +115,47 @@ Router.post("/register",verifyCaptcha, async (req, res) => {
           year,
           gender,
           residence,
+        } = req.body;
+    
+        const useremail = await homeSchema.findOne({
+          email: email,
         });
-        await userData.save();
-        res.json({ success: true, msg: "Registered Successfully" });
-      } catch (err) {
-        console.log(err);
-        res.json({ succes: false });
+        if (useremail) {
+          console.log("User Already Exists");
+          res.json({ success: false, msg: "User already exist" });
+        } else {
+          try {
+            const userData = new homeSchema({
+              username,
+              email,
+              studentNumber,
+              phone,
+              hackerRankUsername,
+              UnstopUsername,
+              section,
+              branch,
+              year,
+              gender,
+              residence,
+            });
+            await userData.save();
+            res.json({ success: true, msg: "Registered Successfully" });
+          } catch (err) {
+            console.log(err);
+            res.json({ succes: false });
+          }
+        }
+      } catch (error) {
+        console.log(error);
       }
+      res.status(200).json({ message: 'Registration successful' });
+    } else {
+      // reCAPTCHA verification failed
+      res.status(400).json({ error: 'reCAPTCHA verification failed' });
     }
   } catch (error) {
-    console.log(error);
+    // Handle any errors
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-module.exports = Router;
