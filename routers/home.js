@@ -11,6 +11,7 @@ Router.get("/", async (req, res) => {
     return res.status(400).send(err.message);
   }
 });
+const app = express();
 // const verifyCaptcha = async (req, res, next) => {
 //   const { "g-recaptcha-response": token } = req.body;
 //   const secretKey = "6Le_np0mAAAAANvpwFAN6nd9PBub3_3jrWRLbsrY";
