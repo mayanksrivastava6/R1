@@ -29,40 +29,6 @@ const userSchema = new schema({
     required: true,
   },
 
-  section: {
-    type: String,
-    required: true,
-    enum: ["1", "2", "3"],
-  },
-  year: {
-    type: String,
-    enum: ["2nd Year"],
-  },
-  branch: {
-    type: String,
-    enum: [
-      "CSE",
-      "CS",
-      "CSE(AIML)",
-      "CSE(DS)",
-      "CSE(Hindi)",
-      "CSIT",
-      "IT",
-      "ECE",
-      "Electrical",
-      "AIML",
-      "Mechincal",
-      "Civil",
-    ],
-  },
-  gender: {
-    type: String,
-    enum: ["Male", "Female", "Others"],
-  },
-  residence: {
-    type: String,
-    enum: ["Hosteller", "Day Scholar"],
-  },
 });
 
 module.exports = mongoose.model("Registeruser", userSchema);

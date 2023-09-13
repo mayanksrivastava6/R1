@@ -36,11 +36,6 @@ Router.post("/register", async (req, res) => {
       phone,
       hackerRankUsername,
       UnstopUsername,
-      section,
-      branch,
-      year,
-      gender,
-      residence,
     } = req.body;
 
     const useremail = await homeSchema.findOne({
@@ -58,11 +53,6 @@ Router.post("/register", async (req, res) => {
           phone,
           hackerRankUsername,
           UnstopUsername,
-          section,
-          branch,
-          year,
-          gender,
-          residence,
         });
         await userData.save();
         res.json({ success: true, msg: "Registered Successfully" });
